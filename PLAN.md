@@ -25,7 +25,7 @@ browser (PWA, Next.js) ──/api/* rewrite──► NestJS API ──► Postgr
 | M1 | Monorepo, docker-compose, Prisma schema + migration, auth (OTP) + onboarding, i18n/RTL shell | ✅ |
 | M2 | Questions, feed, forecasting (queued), crowd % (Redis + WS), server lock, admin create/review/publish, templates | ✅ |
 | M3 | Resolution (two-person), void, disputes, scoring jobs, seasons, accuracy rating, finalize, corrections | ✅ |
-| M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ☐ |
+| M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ✅ |
 | M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ☐ |
 | M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ☐ |
 | M7 | PDPL export/delete, banned-word test, a11y pass, seed data, Dockerfiles, README | ☐ |
@@ -60,3 +60,11 @@ Each milestone ends with: all tests green, a summary in the progress log below, 
 - Void (4 reasons) removes all scores. FINAL questions can only be voided by an admin. Corrections are admin-only: they re-score everyone and show a public note. Everything is audit-logged.
 - `/me/stats`: season points, week points, scored count, and the accuracy rating (null below 20).
 - Tests: 30 API integration tests in total pass.
+
+### M4 ✅
+- Weekly leagues: a user joins a group on their first forecast or score of the Riyadh week. Group assignment is serialized with a Postgres advisory lock, and groups fill to 30. Divisions carry over from the last result.
+- Rollover: a BullMQ cron runs `0 0 * * 0` in Asia/Riyadh, with a sweeper as backup. It ranks each group (points, then join time) and records top 5 UP and bottom 5 DOWN, bounded at divisions 1 and 5.
+- Leaderboards are Redis sorted sets for week, season and season×category, updated by score deltas, so corrections and voids adjust them. The friends board uses ZMSCORE. A rebuild-from-DB is available.
+- Leaderboard data contains nicknames only. Tests assert that no phone data appears.
+- Web: `/league` (group table with promotion and relegation zones) and `/leaderboards` (tabs).
+- Tests: 34 API integration tests pass.
