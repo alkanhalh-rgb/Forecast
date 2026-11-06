@@ -7,6 +7,9 @@ import { PrismaService } from '../common/prisma.service';
 import { ConsoleSmsProvider } from '../auth/sms/console.provider';
 import { SMS_PROVIDER } from '../auth/sms/sms.provider';
 import { SweeperService } from '../jobs/sweeper.service';
+import { encryptPhone, hashPhone } from '../common/crypto';
+import { signSession } from '../common/session';
+import { randomInt } from 'node:crypto';
 
 /**
  * Helpers for automated end-to-end tests. Only mounted when ENABLE_TEST_ROUTES=true and
@@ -45,6 +48,18 @@ export class TestRoutesController {
   @HttpCode(200)
   async tick() {
     return this.sweeper.runAll();
+  }
+
+  /** Creates an onboarded user directly (supporting actors in e2e tests) and returns a session token. */
+  @Public()
+  @Post('users')
+  async createUser(@Body() body: { nickname: string; role?: 'USER' | 'EDITOR' | 'REVIEWER' | 'ADMIN' }) {
+    const phone = `+9665${String(randomInt(0, 99_999_999)).padStart(8, '0')}`;
+    const at = this.clock.now();
+    const u = await this.prisma.user.create({
+      data: { phoneHash: hashPhone(phone), phoneEncrypted: encryptPhone(phone), nickname: body.nickname, city: 'riyadh', interests: ['spl', 'oil', 'tech'], role: body.role ?? 'USER', ageConfirmedAt: at, onboardedAt: at, consentLog: [{ type: 'AGE_18_PLUS', at }] },
+    });
+    return { id: u.id, token: await signSession(u.id) };
   }
 
   @Public()

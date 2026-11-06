@@ -13,7 +13,7 @@ type DuelFull = Duel & { questions: (DuelQuestion & { question: Question & { res
 const FULL = { questions: { include: { question: { include: { resolution: true, category: true } } }, orderBy: { order: 'asc' as const } } };
 
 /**
- * Duels have nothing at stake: the winner gets a badge and a rating (Elo) change only.
+ * Duels carry no value of any kind: the winner gets a badge and a rating (Elo) change only.
  * Elo lives in DuelRating and never touches Score, season points or leaderboards.
  */
 @Injectable()

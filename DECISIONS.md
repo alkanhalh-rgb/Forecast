@@ -91,3 +91,7 @@ Choices that the spec does not cover. Each entry gives the decision and the reas
     locks, the final snapshot is shown to everyone, because it can no longer influence anyone's forecast.
 34. **Bidi.** Every interpolated value in UI strings is wrapped in Unicode isolates (LRI/FSI…PDI), so "+58" or "90%"
     keep their order inside Arabic sentences.
+35. **API container base image.** The API image is built on the official Playwright image (`mcr.microsoft.com/playwright:v1.63.0-noble`), which bundles Node and a pinned Chromium for share cards, so builds need no OS package mirrors. It is overridable with `--build-arg BASE_IMAGE=...`. A slimmer production image can use a distro Chromium (set `CHROMIUM_PATH`).
+36. **Optional build-time CA and proxy.** Both Dockerfiles accept `--secret id=ca` and the standard proxy build args, for TLS-intercepting corporate networks. They do nothing when these are not supplied.
+37. **Test-only user creation.** `/api/test/users` creates onboarded users without OTP (e2e supporting actors), so the OTP limits stay realistic. Like every test route, it is absent unless `ENABLE_TEST_ROUTES=true` and `NODE_ENV` is not production.
+38. **Disputes.** Only users who forecast on a question may report its result, one report per user.

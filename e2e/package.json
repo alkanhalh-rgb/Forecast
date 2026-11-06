@@ -1,0 +1,16 @@
+{
+  "name": "@app/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test --trace off",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3",
+    "@app/shared": "workspace:*"
+  }
+}

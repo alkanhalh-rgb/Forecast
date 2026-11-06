@@ -98,7 +98,7 @@ function LanguageToggle() {
     <button
       type="button"
       className="btn-secondary text-sm"
-      aria-label={t('nav.switchLanguageLabel')}
+      title={t('nav.switchLanguageLabel')}
       lang={next}
       onClick={() => {
         document.cookie = `locale=${next}; path=/; max-age=31536000; samesite=lax`;

@@ -48,8 +48,8 @@ Leave extension points only (see `DECISIONS.md` → "Future Sponsor/Prize").
 ## Commands
 
 - `pnpm i` · `docker compose up -d postgres redis` · `pnpm db:migrate` · `pnpm db:seed` · `pnpm dev`
-- `pnpm test` (unit + API integration) · `pnpm e2e` (Playwright, needs running stack)
-- `pnpm lint` · `pnpm typecheck`
+- `pnpm test` (unit + API integration) · `pnpm e2e` (Playwright, needs a running stack) · `pnpm typecheck`
+- Translations: edit `apps/web/messages/ar.json` and `en.json` together (the banned-word test checks both have the same keys)
 
 ## Working method
 

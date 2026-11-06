@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import { GROUP_SIZE, MIN_DIVISION, nextDivision, rankGroup, weekKey, weekStart, WEEK_MS } from '@app/shared';
 import { ClockService } from '../common/clock.service';
 import { DomainEvents, ScoreDelta } from '../common/events.service';
@@ -18,7 +18,7 @@ export const lbKeys = {
  * top 5 of each group move up and the bottom 5 move down. Leaderboards are Redis sorted sets.
  */
 @Injectable()
-export class LeaguesService implements OnModuleInit {
+export class LeaguesService implements OnModuleInit, OnApplicationBootstrap {
   private log = new Logger('Leagues');
 
   constructor(
@@ -36,6 +36,13 @@ export class LeaguesService implements OnModuleInit {
     this.queues.register(QUEUES.leagues, 'rollover', () => this.rolloverDue(), 1);
     this.sweeper.register('leagueRollover', () => this.rolloverDue());
     void this.queues.addRepeatable(QUEUES.leagues, 'rollover', { pattern: '0 0 * * 0', tz: 'Asia/Riyadh' });
+  }
+
+  /** After a restore or a seed, Redis may be empty while scores exist: rebuild once. */
+  async onApplicationBootstrap() {
+    if (this.queues.inline) return;
+    const [keys, scores] = await Promise.all([this.redis.client.keys('lb:*'), this.prisma.score.count()]);
+    if (keys.length === 0 && scores > 0) this.log.log(`rebuilt leaderboards: ${JSON.stringify(await this.rebuildLeaderboards())}`);
   }
 
   /** Division a user plays in for a new week, from their most recent membership. */

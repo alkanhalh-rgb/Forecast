@@ -28,7 +28,7 @@ browser (PWA, Next.js) ──/api/* rewrite──► NestJS API ──► Postgr
 | M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ✅ |
 | M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ✅ |
 | M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ✅ |
-| M7 | PDPL export/delete, banned-word test, a11y pass, seed data, Dockerfiles, README | ☐ |
+| M7 | PDPL export/delete, banned-word test, a11y pass, seed data, Dockerfiles, README | ✅ |
 
 Each milestone ends with: all tests green, a summary in the progress log below, and a git commit.
 
@@ -86,3 +86,12 @@ Each milestone ends with: all tests green, a summary in the progress log below, 
 - Notifications: an in-app inbox plus Web Push (VAPID) for resolutions, voids, corrections, duel challenges, duel results and dispute decisions. Quiet hours 23:00–07:00 Riyadh: delivery is deferred to 07:00 by a delayed job, with a sweeper as backup.
 - Web: friends, join link, and a profile page (stats, streak, badges, Elo, share cards, push opt-in, inbox, export/delete).
 - Tests: 53 API integration tests pass.
+
+### M7 ✅
+- PDPL: `GET /api/me/export` (full JSON, including the decrypted phone, owner only) and `DELETE /api/me` (nickname confirmation, hard delete, Redis cleanup).
+- Banned-word test: scans both translation files (and checks they have the same keys) plus every source tree. It already caught three slips during development.
+- Accessibility: an axe scan (WCAG 2.1 AA tags) of 12 screens in Arabic and English finds no serious or critical issues. Keyboard test: skip link, then forecast form. A label-in-name issue on the language toggle was found and fixed.
+- Seed: 6 categories, 4 staff/demo accounts, 200 users, 50 questions (LIVE, LOCKED, RESOLVED, FINAL, VOID, DRAFT, REVIEW), about 3,000 forecasts, scores, weekly leagues with closed past weeks, duels and 3 friend leagues.
+- Dockerfiles: API (Playwright base with pinned Chromium; migrate and runtime targets) and web (Next standalone). `docker compose up` brings up the full stack, migrated and seeded, in about 30s after the images build.
+- E2E (Playwright): both required flows plus a11y and keyboard tests. All 4 pass against the local stack and against a fresh `docker compose up`.
+- Final: 73 unit tests, 55 API integration tests and 4 e2e tests pass. Typecheck is clean across all packages.
