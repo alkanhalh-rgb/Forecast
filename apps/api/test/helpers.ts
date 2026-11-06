@@ -99,3 +99,12 @@ export async function makeLiveQuestion(
     include: { category: true },
   });
 }
+
+/** Locks (by moving the clock past lockAt), proposes and confirms an outcome through the API. */
+export async function resolveViaApi(ctx: TestCtx, questionId: string, winningOptionId: string, editorAuth: Record<string, string>, confirmerAuth: Record<string, string>) {
+  const q = await ctx.prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+  const now = ctx.clock.now().getTime();
+  if (q.lockAt.getTime() > now) ctx.clock.advance(q.lockAt.getTime() - now + 1000);
+  await ctx.http().post(`/api/admin/questions/${questionId}/resolve`).set(editorAuth).send({ winningOptionId, sourceUrl: 'https://www.saudiexchange.sa/result' }).expect(200);
+  return ctx.http().post(`/api/admin/questions/${questionId}/confirm`).set(confirmerAuth).send({}).expect(200);
+}

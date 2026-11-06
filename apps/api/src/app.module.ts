@@ -9,10 +9,11 @@ import { JobsModule } from './jobs/jobs.module';
 import { UsersModule } from './users/users.module';
 import { QuestionsModule } from './questions/questions.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { ScoringModule } from './scoring/scoring.module';
 import { TestRoutesModule } from './test-routes/test-routes.module';
 
 @Module({
-  imports: [CommonModule, JobsModule, RealtimeModule, AuthModule, QuestionsModule, UsersModule, CategoriesModule, TestRoutesModule.register()],
+  imports: [CommonModule, JobsModule, RealtimeModule, AuthModule, QuestionsModule, ScoringModule, UsersModule, CategoriesModule, TestRoutesModule.register()],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AppGuard }],
 })

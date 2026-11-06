@@ -1,10 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+export interface ScoreDelta {
+  userId: string;
+  forecastId: string;
+  categoryId: string;
+  seasonId: string;
+  weekStart: Date;
+  before: number | null;
+  after: number | null;
+  delta: number;
+}
+
 export interface DomainEventMap {
   /** a forecast was stored (first time or changed) */
   'forecast.saved': { userId: string; questionId: string; at: Date; first: boolean };
-  /** scores were written/changed for a question */
-  'question.scored': { questionId: string; reason: 'RESOLVED' | 'CORRECTED' | 'VOIDED' };
+  /** scores were written/changed/removed for a question; deltas drive leaderboards */
+  'question.scored': { questionId: string; reason: 'RESOLVED' | 'CORRECTED' | 'VOIDED'; deltas: ScoreDelta[] };
+  'dispute.decided': { disputeId: string };
   'duel.decided': { duelId: string };
 }
 

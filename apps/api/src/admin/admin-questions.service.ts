@@ -35,7 +35,9 @@ export class AdminQuestionsService {
       include: { category: true, resolution: true, createdBy: { select: { id: true, nickname: true } }, reviewedBy: { select: { id: true, nickname: true } }, _count: { select: { forecasts: true } } },
     });
     if (!q) throw notFound();
-    return { ...q, autoChecks: this.autoChecks(q, this.clock.now()) };
+    const nick = async (id?: string | null) => (id ? (await this.prisma.user.findUnique({ where: { id }, select: { nickname: true } }))?.nickname ?? null : null);
+    const resolution = q.resolution ? { ...q.resolution, resolvedByNickname: await nick(q.resolution.resolvedById), confirmedByNickname: await nick(q.resolution.confirmedById) } : null;
+    return { ...q, resolution, autoChecks: this.autoChecks(q, this.clock.now()) };
   }
 
   autoChecks(q: Pick<Question, 'textAr' | 'textEn' | 'sourceName' | 'sourceUrl' | 'lockAt' | 'resolveBy' | 'options'>, publishAt: Date) {

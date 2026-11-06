@@ -24,7 +24,7 @@ browser (PWA, Next.js) ──/api/* rewrite──► NestJS API ──► Postgr
 |---|-------|--------|
 | M1 | Monorepo, docker-compose, Prisma schema + migration, auth (OTP) + onboarding, i18n/RTL shell | ✅ |
 | M2 | Questions, feed, forecasting (queued), crowd % (Redis + WS), server lock, admin create/review/publish, templates | ✅ |
-| M3 | Resolution (two-person), void, disputes, scoring jobs, seasons, accuracy rating, finalize, corrections | ☐ |
+| M3 | Resolution (two-person), void, disputes, scoring jobs, seasons, accuracy rating, finalize, corrections | ✅ |
 | M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ☐ |
 | M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ☐ |
 | M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ☐ |
@@ -51,3 +51,12 @@ Each milestone ends with: all tests green, a summary in the progress log below, 
 - Crowd % comes from Redis hash counters. It is hidden until the user forecasts, then pushed live over Socket.IO, fanned out through Redis pub/sub so it works across instances.
 - Admin: create, edit, templates (TASI, Brent, weather, SPL match), publish checklist (automatic checks plus attestations, re-checked at publish), reviewer ≠ creator, audit log for every action.
 - Tests: 22 API integration tests (lock enforcement, last-wins, crowd visibility, rate limit, admin flow and checklist). A browser smoke test confirmed a live crowd update reaches the page.
+
+### M3 ✅
+- Resolution is two-person: an editor proposes the outcome and source, and a different staff member confirms it. Scores are only written on confirm.
+- Scoring uses the shared formula. Scores carry season and week attribution from the first resolution. Seasons are created lazily (6 weeks).
+- Finalization: a delayed job plus a sweeper make a question FINAL 12h after resolution, and only when no dispute is open.
+- Disputes: forecasters can report during the window (once each). There is an admin queue to decide them, plus a `dispute.decided` event (used for notifications in M6).
+- Void (4 reasons) removes all scores. FINAL questions can only be voided by an admin. Corrections are admin-only: they re-score everyone and show a public note. Everything is audit-logged.
+- `/me/stats`: season points, week points, scored count, and the accuracy rating (null below 20).
+- Tests: 30 API integration tests in total pass.

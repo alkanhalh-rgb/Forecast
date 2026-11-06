@@ -13,7 +13,7 @@ beforeEach(async () => {
   await seedCategories(ctx);
 });
 
-const forecast = (auth: object, questionId: string, optionId = 'opt0', confidence = 75) => ctx.http().post('/api/forecasts').set(auth).send({ questionId, optionId, confidence });
+const forecast = (auth: Record<string, string>, questionId: string, optionId = 'opt0', confidence = 75) => ctx.http().post('/api/forecasts').set(auth).send({ questionId, optionId, confidence });
 
 describe('server-side lock enforcement', () => {
   it('accepts before lockAt and rejects after lockAt even while the status is still LIVE', async () => {
@@ -136,7 +136,7 @@ describe('admin create → review → publish', () => {
   beforeEach(async () => {
     weatherId = (await ctx.prisma.category.findUniqueOrThrow({ where: { slug: 'weather' } })).id;
   });
-  function draft(auth: object, overrides: Record<string, unknown> = {}) {
+  function draft(auth: Record<string, string>, overrides: Record<string, unknown> = {}) {
     const now = ctx.clock.now().getTime();
     return ctx
       .http()
