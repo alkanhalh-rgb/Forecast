@@ -1,0 +1,24 @@
+{
+  "name": "forecast-platform",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "e2e": "pnpm --filter @app/e2e test",
+    "db:migrate": "pnpm --filter @app/db migrate:deploy",
+    "db:migrate:dev": "pnpm --filter @app/db migrate:dev",
+    "db:seed": "pnpm --filter @app/db seed",
+    "db:reset": "pnpm --filter @app/db reset"
+  },
+  "devDependencies": {
+    "turbo": "2.11.10",
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma", "@swc/core", "esbuild", "sharp", "msgpackr-extract", "@nestjs/core"]
+  }
+}

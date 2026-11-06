@@ -1,0 +1,420 @@
+// Phase 1 data model. Points are a score, never a balance: there is no balance, wallet,
+// purchase or transfer model, and none must be added (CLAUDE.md rules 1-3).
+// Future Sponsor / Prize tables are intentionally NOT built (see DECISIONS.md #32).
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  EDITOR
+  REVIEWER
+  ADMIN
+}
+
+enum QuestionStatus {
+  DRAFT
+  REVIEW
+  LIVE
+  LOCKED
+  RESOLVED
+  FINAL
+  VOID
+}
+
+enum Movement {
+  UP
+  DOWN
+  STAY
+}
+
+enum DuelFormat {
+  SINGLE
+  BEST_OF_3
+}
+
+enum DuelStatus {
+  PENDING
+  ACTIVE
+  DONE
+  VOID
+  EXPIRED
+}
+
+enum DisputeStatus {
+  OPEN
+  UPHELD
+  REJECTED
+}
+
+enum VoidReason {
+  POSTPONED
+  ABANDONED
+  SOURCE_UNAVAILABLE_48H
+  AMBIGUOUS
+}
+
+model User {
+  id             String    @id @default(cuid())
+  phoneHash      String    @unique
+  phoneEncrypted String
+  nickname       String?   @unique
+  city           String?
+  interests      String[]
+  role           Role      @default(USER)
+  ageConfirmedAt DateTime?
+  consentLog     Json      @default("[]")
+  onboardedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  forecasts           Forecast[]
+  scores              Score[]
+  memberships         LeagueMembership[]
+  duelsAsChallenger   Duel[]               @relation("challenger")
+  duelsAsOpponent     Duel[]               @relation("opponent")
+  duelRating          DuelRating?
+  friendLeaguesOwned  FriendLeague[]
+  friendLeagues       FriendLeagueMember[]
+  streak              Streak?
+  badges              BadgeAward[]
+  disputes            Dispute[]
+  pushSubscriptions   PushSubscription[]
+  notifications       Notification[]
+  shareCards          ShareCard[]
+  questionsCreated    Question[]           @relation("createdBy")
+  questionsReviewed   Question[]           @relation("reviewedBy")
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  nameAr    String
+  nameEn    String
+  questions Question[]
+}
+
+model Question {
+  id          String         @id @default(cuid())
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+  textAr      String
+  textEn      String
+  /// [{ id, labelAr, labelEn }]
+  options     Json
+  lockAt      DateTime
+  resolveBy   DateTime
+  sourceName  String
+  sourceUrl   String
+  status      QuestionStatus @default(DRAFT)
+  createdById String?
+  createdBy   User?          @relation("createdBy", fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedById String?
+  reviewedBy  User?          @relation("reviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+  /// automatic checks + attestations from the publish checklist
+  checklist   Json?
+  templateKey String?
+  /// final crowd distribution stored when the question locks: { total, counts: { optionId: n } }
+  crowdSnapshot Json?
+  voidReason  VoidReason?
+  voidNote    String?
+  /// extension point for future phases (e.g. attribution). Must not hold anything of value.
+  meta        Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  forecasts     Forecast[]
+  history       ForecastHistory[]
+  resolution    Resolution?
+  scores        Score[]
+  duelQuestions DuelQuestion[]
+  disputes      Dispute[]
+
+  @@index([status, lockAt])
+  @@index([categoryId, status])
+}
+
+model Forecast {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionId    String
+  confidence  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  score       Score?
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+}
+
+model ForecastHistory {
+  id          String   @id @default(cuid())
+  forecastId  String
+  userId      String
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionId    String
+  confidence  Int
+  submittedAt DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([forecastId])
+  @@index([userId])
+}
+
+model Resolution {
+  questionId      String    @id
+  question        Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  winningOptionId String
+  sourceUrl       String
+  resolvedById    String?
+  confirmedById   String?
+  /// set when the second person confirms and scoring runs
+  resolvedAt      DateTime?
+  finalizedAt     DateTime?
+  correctionNote  String?
+  correctedAt     DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model Season {
+  id       String   @id @default(cuid())
+  index    Int      @unique
+  startsAt DateTime @unique
+  endsAt   DateTime
+  closedAt DateTime?
+  scores   Score[]
+}
+
+model Score {
+  id         String   @id @default(cuid())
+  forecastId String   @unique
+  forecast   Forecast @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  seasonId   String
+  season     Season   @relation(fields: [seasonId], references: [id])
+  categoryId String
+  /// Riyadh week (Sunday 00:00) the score is attributed to
+  weekStart  DateTime
+  points     Int
+  correct    Boolean
+  confidence Int
+  scoredAt   DateTime
+
+  @@index([userId, scoredAt])
+  @@index([seasonId, userId])
+  @@index([questionId])
+}
+
+model LeagueWeek {
+  id         String        @id @default(cuid())
+  weekStart  DateTime      @unique
+  closedAt   DateTime?
+  groups     LeagueGroup[]
+}
+
+model LeagueGroup {
+  id          String             @id @default(cuid())
+  weekId      String
+  week        LeagueWeek         @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  weekStart   DateTime
+  division    Int
+  index       Int
+  memberships LeagueMembership[]
+
+  @@unique([weekStart, division, index])
+}
+
+model LeagueMembership {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStart    DateTime
+  division     Int
+  groupId      String
+  group        LeagueGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  weeklyPoints Int         @default(0)
+  finalRank    Int?
+  movement     Movement?
+  joinedAt     DateTime    @default(now())
+
+  @@unique([userId, weekStart])
+  @@index([groupId])
+}
+
+model Duel {
+  id                String         @id @default(cuid())
+  format            DuelFormat
+  challengerId      String
+  challenger        User           @relation("challenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  opponentId        String?
+  opponent          User?          @relation("opponent", fields: [opponentId], references: [id], onDelete: Cascade)
+  status            DuelStatus     @default(PENDING)
+  winnerId          String?
+  /// stored so that a later void/correction can reverse the rating change exactly
+  challengerEloDelta Int?
+  opponentEloDelta   Int?
+  expiresAt         DateTime
+  acceptedAt        DateTime?
+  decidedAt         DateTime?
+  weekStart         DateTime
+  createdAt         DateTime       @default(now())
+  questions         DuelQuestion[]
+
+  @@index([challengerId, opponentId, weekStart])
+  @@index([status, expiresAt])
+}
+
+model DuelQuestion {
+  id                 String   @id @default(cuid())
+  duelId             String
+  duel               Duel     @relation(fields: [duelId], references: [id], onDelete: Cascade)
+  questionId         String
+  question           Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  order              Int
+  /// CHALLENGER | OPPONENT | SYSTEM
+  pickedBy           String
+  challengerOptionId String?
+  opponentOptionId   String?
+
+  @@unique([duelId, order])
+  @@index([questionId])
+}
+
+model DuelRating {
+  userId      String @id
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int    @default(1200)
+  duelsPlayed Int    @default(0)
+  wins        Int    @default(0)
+}
+
+model FriendLeague {
+  id         String               @id @default(cuid())
+  name       String
+  inviteCode String               @unique
+  ownerId    String
+  owner      User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime             @default(now())
+  members    FriendLeagueMember[]
+}
+
+model FriendLeagueMember {
+  leagueId String
+  league   FriendLeague @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime     @default(now())
+
+  @@id([leagueId, userId])
+  @@index([userId])
+}
+
+model Streak {
+  userId              String  @id
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  current             Int     @default(0)
+  best                Int     @default(0)
+  lastActiveDay       String?
+  shieldsUsedThisWeek Int     @default(0)
+  shieldWeek          String?
+}
+
+model BadgeAward {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     String
+  /// unique key per award, e.g. "BEAT_THE_CROWD:<questionId>" or "DUEL_WIN_1"
+  awardKey  String
+  awardedAt DateTime @default(now())
+  meta      Json?
+
+  @@unique([userId, awardKey])
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  questionId  String
+  question    Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evidenceUrl String
+  message     String
+  status      DisputeStatus @default(OPEN)
+  decision    String?
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@unique([questionId, userId])
+  @@index([status])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+/// In-app inbox; every push is also stored here.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  titleKey  String
+  bodyKey   String
+  params    Json?
+  url       String?
+  /// when it may be delivered (quiet hours push this to 07:00 Riyadh)
+  deliverAt DateTime
+  sentAt    DateTime?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model ShareCard {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  refId     String
+  image     Bytes
+  createdAt DateTime @default(now())
+
+  @@unique([userId, kind, refId])
+}

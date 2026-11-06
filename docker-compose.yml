@@ -1,0 +1,57 @@
+# Local development stack.
+#   docker compose up              -> full stack (postgres, redis, migrate+seed, api, web)
+#   docker compose up -d postgres redis   -> only the data services (then `pnpm dev`)
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: forecast
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d forecast"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: { context: ., dockerfile: apps/api/Dockerfile, target: migrate }
+    env_file: [.env.docker]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile, target: runtime }
+    env_file: [.env.docker]
+    ports: ["4000:4000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      PORT: "3000"
+    ports: ["3000:3000"]
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  redisdata:

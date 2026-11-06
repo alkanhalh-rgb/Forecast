@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+
+/* Colours chosen for WCAG AA contrast on their backgrounds. */
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-600: #047857; /* 5.5:1 on white */
+  --color-brand-700: #065f46;
+  --color-brand-800: #064e3b;
+  --color-ink: #111827;
+  --color-muted: #4b5563; /* 7.5:1 on white */
+  --color-line: #d1d5db;
+  --color-good: #166534;
+  --color-bad: #b91c1c;
+  --color-warn: #92400e;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-gray-50 text-ink font-sans antialiased;
+}
+:focus-visible {
+  outline: 3px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+@utility card {
+  @apply rounded-2xl border border-line bg-white p-4 shadow-sm;
+}
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+}
+@utility btn-secondary {
+  @apply btn border border-line bg-white text-ink hover:bg-gray-100;
+}
+@utility btn-danger {
+  @apply btn bg-bad text-white hover:bg-red-800;
+}
+@utility input {
+  @apply block w-full min-h-11 rounded-xl border border-gray-400 bg-white px-3 py-2 text-ink placeholder:text-gray-500;
+}
+@utility label {
+  @apply mb-1 block text-sm font-medium text-ink;
+}
+@utility chip {
+  @apply inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors;
+}
+@utility num {
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
