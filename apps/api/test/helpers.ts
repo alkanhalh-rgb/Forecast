@@ -73,3 +73,29 @@ export async function seedCategories(ctx: TestCtx) {
   for (const [slug, nameAr, nameEn] of cats) await ctx.prisma.category.create({ data: { slug: slug!, nameAr: nameAr!, nameEn: nameEn! } });
   return ctx.prisma.category.findMany();
 }
+
+/** Inserts a LIVE question directly (bypassing the admin flow) for tests. */
+export async function makeLiveQuestion(
+  ctx: TestCtx,
+  opts: { lockInMs?: number; resolveInMs?: number; options?: number; categorySlug?: string; status?: 'LIVE' | 'LOCKED' } = {},
+) {
+  const now = ctx.clock.now().getTime();
+  const cat = (await ctx.prisma.category.findUnique({ where: { slug: opts.categorySlug ?? 'tadawul' } })) ?? (await ctx.prisma.category.findFirstOrThrow());
+  const n = opts.options ?? 2;
+  const labels = n === 2 ? [['نعم', 'Yes'], ['لا', 'No']] : Array.from({ length: n }, (_, i) => [`خيار ${i + 1}`, `Option ${i + 1}`]);
+  return ctx.prisma.question.create({
+    data: {
+      categoryId: cat.id,
+      textAr: 'هل سيغلق مؤشر تاسي على ارتفاع اليوم؟',
+      textEn: 'Will TASI close higher today?',
+      options: labels.map(([ar, en], i) => ({ id: `opt${i}`, labelAr: ar!, labelEn: en! })),
+      lockAt: new Date(now + (opts.lockInMs ?? 3600_000)),
+      resolveBy: new Date(now + (opts.resolveInMs ?? 6 * 3600_000)),
+      sourceName: 'Saudi Exchange',
+      sourceUrl: 'https://www.saudiexchange.sa/',
+      status: opts.status ?? 'LIVE',
+      publishedAt: new Date(now),
+    },
+    include: { category: true },
+  });
+}

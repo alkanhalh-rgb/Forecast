@@ -51,7 +51,7 @@ export function ForecastForm({ q, onSaved }: { q: QuestionDto; onSaved?: (res: a
           {CONFIDENCE_LEVELS.map((c) => (
             <label key={c} className={`chip cursor-pointer ${confidence === c ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-white text-ink'}`}>
               <input type="radio" className="sr-only" name={`conf-${q.id}`} value={c} checked={confidence === c} onChange={() => setConfidence(c)} />
-              <span className="num">{t('question.confidence', { n: c })}</span>
+              <span>{t('question.confidence', { n: `${c}%` })}</span>
             </label>
           ))}
         </div>

@@ -87,6 +87,10 @@
     "sakaka": "Sakaka",
     "other": "Other"
   },
+  "time": {
+    "minutes": "{n} min",
+    "hours": "{n}h {m}m"
+  },
   "feed": {
     "title": "Today’s questions",
     "all": "All",
@@ -103,13 +107,13 @@
     "resolveBy": "Resolves by",
     "chooseOption": "Choose your forecast",
     "chooseConfidence": "How confident are you?",
-    "confidence": "{n}% confidence",
+    "confidence": "{n} confidence",
     "scorePreview": "If right: {win} · If wrong: {lose}",
     "submit": "Save my forecast",
     "update": "Update my forecast",
     "saved": "Your forecast is saved",
     "queued": "Your forecast was received and is being saved",
-    "yourForecast": "Your forecast: {option} at {n}% confidence",
+    "yourForecast": "Your forecast: {option} at {n} confidence",
     "changeUntil": "You can change your forecast until {time}. The last one counts.",
     "crowd": "Crowd forecast",
     "crowdHidden": "The crowd split appears after you forecast.",

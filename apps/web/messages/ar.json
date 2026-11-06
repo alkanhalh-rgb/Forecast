@@ -87,6 +87,10 @@
     "sakaka": "سكاكا",
     "other": "أخرى"
   },
+  "time": {
+    "minutes": "{n} دقيقة",
+    "hours": "{n} س {m} د"
+  },
   "feed": {
     "title": "أسئلة اليوم",
     "all": "الكل",
@@ -103,13 +107,13 @@
     "resolveBy": "يُحسم قبل",
     "chooseOption": "اختر توقعك",
     "chooseConfidence": "ما مدى ثقتك؟",
-    "confidence": "ثقة {n}%",
+    "confidence": "ثقة {n}",
     "scorePreview": "إن أصبت: {win} · إن أخطأت: {lose}",
     "submit": "سجّل توقعي",
     "update": "حدّث توقعي",
     "saved": "تم حفظ توقعك",
     "queued": "تم استلام توقعك وجارٍ حفظه",
-    "yourForecast": "توقعك: {option} بثقة {n}%",
+    "yourForecast": "توقعك: {option} بثقة {n}",
     "changeUntil": "يمكنك تغيير توقعك حتى {time}. آخر توقع هو المعتمد.",
     "crowd": "توقعات الجمهور",
     "crowdHidden": "تظهر نسب الجمهور بعد أن تسجّل توقعك.",

@@ -18,15 +18,26 @@ interface I18nValue {
 
 const Ctx = createContext<I18nValue | null>(null);
 
+/** Left-to-right isolate for numbers/Latin text, first-strong isolate when the value has Arabic letters. */
+export function isolate(v: string | number): string {
+  const s = String(v);
+  return /[\u0600-\u06FF]/.test(s) ? `\u2068${s}\u2069` : `\u2066${s}\u2069`;
+}
+
 export function I18nProvider({ locale, messages, children }: { locale: Locale; messages: Dict; children: React.ReactNode }) {
-  const t = useCallback((k: string, p?: Record<string, string | number>) => translate(messages, k, p), [messages]);
+  // Every interpolated value is wrapped in a first-strong isolate so numbers like "+58" or "90%"
+  // keep their order inside Arabic sentences.
+  const t = useCallback(
+    (k: string, p?: Record<string, string | number>) => translate(messages, k, p ? Object.fromEntries(Object.entries(p).map(([key, v]) => [key, isolate(v)])) : p),
+    [messages],
+  );
   const value = useMemo<I18nValue>(
     () => ({
       locale,
       dir: locale === 'ar' ? 'rtl' : 'ltr',
       t,
       n: (v) => formatNumber(v, locale),
-      signed: (v) => formatSigned(v, locale),
+      signed: (v) => isolate(formatSigned(v, locale)),
       pct: (f) => formatPercent(f, locale),
       dt: (d) => formatDateTime(d, locale),
       time: (d) => formatTime(d, locale),

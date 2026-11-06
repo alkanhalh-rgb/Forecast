@@ -87,3 +87,7 @@ Choices that the spec does not cover. Each entry gives the decision and the reas
 32. **Future Sponsor/Prize.** No tables are built. Extension points: `Question.meta Json?` (for future attribution),
     `BadgeAward.meta`, and the scoring pipeline's `onQuestionScored` hook list in `ScoringService`. Prize logic in
     later phases must subscribe to those, never modify `Score`.
+33. **Crowd after lock.** The crowd split is hidden from users who have not forecast while a question is LIVE. Once it
+    locks, the final snapshot is shown to everyone, because it can no longer influence anyone's forecast.
+34. **Bidi.** Every interpolated value in UI strings is wrapped in Unicode isolates (LRI/FSI…PDI), so "+58" or "90%"
+    keep their order inside Arabic sentences.
