@@ -12,3 +12,4 @@ export * from './phone';
 export * from './topics';
 export * from './templates';
 export * from './schemas';
+export * from './notification-copy';

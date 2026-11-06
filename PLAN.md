@@ -27,7 +27,7 @@ browser (PWA, Next.js) ──/api/* rewrite──► NestJS API ──► Postgr
 | M3 | Resolution (two-person), void, disputes, scoring jobs, seasons, accuracy rating, finalize, corrections | ✅ |
 | M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ✅ |
 | M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ✅ |
-| M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ☐ |
+| M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ✅ |
 | M7 | PDPL export/delete, banned-word test, a11y pass, seed data, Dockerfiles, README | ☐ |
 
 Each milestone ends with: all tests green, a summary in the progress log below, and a git commit.
@@ -77,3 +77,12 @@ Each milestone ends with: all tests green, a summary in the progress log below, 
 - Pair limit: 3 per Riyadh week. Unaccepted challenges expire at the question lock (sweeper). Duel creation and acceptance are rate limited.
 - Web: duel list with rating, a create page, and a duel page (share link, accept, answer Q2/Q3). No stake wording anywhere.
 - Tests: 44 API integration tests pass.
+
+### M6 ✅
+- Friend leagues: create, invite code and link, join (max 50, enforced under a row lock), weekly ranking, leave.
+- Streaks: one Riyadh calendar day with ≥1 forecast counts as a streak day. One free shield per week is applied automatically.
+- Badges: Calibrated, Beat the Crowd (crowd snapshot at lock, revoked if a correction or void changes it), duel milestones (1/10/50), and season category title (top 1% when a season closes).
+- Share cards: HTML rendered to PNG by headless Chromium with embedded IBM Plex Sans Arabic. They are generated after a duel win or Beat the Crowd and served at `/api/share/:id.png`. An automated check measures joined vs. ZWNJ-separated Arabic to prove that letters join.
+- Notifications: an in-app inbox plus Web Push (VAPID) for resolutions, voids, corrections, duel challenges, duel results and dispute decisions. Quiet hours 23:00–07:00 Riyadh: delivery is deferred to 07:00 by a delayed job, with a sweeper as backup.
+- Web: friends, join link, and a profile page (stats, streak, badges, Elo, share cards, push opt-in, inbox, export/delete).
+- Tests: 53 API integration tests pass.
