@@ -26,7 +26,7 @@ browser (PWA, Next.js) ──/api/* rewrite──► NestJS API ──► Postgr
 | M2 | Questions, feed, forecasting (queued), crowd % (Redis + WS), server lock, admin create/review/publish, templates | ✅ |
 | M3 | Resolution (two-person), void, disputes, scoring jobs, seasons, accuracy rating, finalize, corrections | ✅ |
 | M4 | Weekly leagues (groups of 30, 5 divisions, promotion/relegation) and leaderboards (week/season/category/friends) | ✅ |
-| M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ☐ |
+| M5 | Duels SINGLE and BEST_OF_3, Elo, pair limit, expiry | ✅ |
 | M6 | Friend leagues, streaks + shields, badges, share cards, web push + quiet hours | ☐ |
 | M7 | PDPL export/delete, banned-word test, a11y pass, seed data, Dockerfiles, README | ☐ |
 
@@ -68,3 +68,12 @@ Each milestone ends with: all tests green, a summary in the progress log below, 
 - Leaderboard data contains nicknames only. Tests assert that no phone data appears.
 - Web: `/league` (group table with promotion and relegation zones) and `/leaderboards` (tabs).
 - Tests: 34 API integration tests pass.
+
+### M5 ✅
+- SINGLE duel: the challenger picks a question and answer and shares a link (or names an opponent by nickname). The opponent must pick a different option.
+- BEST_OF_3: Q1 from the challenger, Q2 from the opponent, Q3 picked at random by the system from LIVE questions locking within 24h. Q3 answers are independent, and the other side's pick stays hidden until lock.
+- Outcomes use the shared `duelOutcome`: ties, voids as no result, all-void → VOID. Duels are decided on scoring and re-decided on void or correction. Stored Elo deltas are reversed exactly.
+- Elo: start 1200, K = 32, tie = 0.5, stored only in `DuelRating`. Tests assert that no Score rows or season points come from duels.
+- Pair limit: 3 per Riyadh week. Unaccepted challenges expire at the question lock (sweeper). Duel creation and acceptance are rate limited.
+- Web: duel list with rating, a create page, and a duel page (share link, accept, answer Q2/Q3). No stake wording anywhere.
+- Tests: 44 API integration tests pass.

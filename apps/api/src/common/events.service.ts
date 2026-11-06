@@ -18,6 +18,7 @@ export interface DomainEventMap {
   'question.scored': { questionId: string; reason: 'RESOLVED' | 'CORRECTED' | 'VOIDED'; deltas: ScoreDelta[] };
   'dispute.decided': { disputeId: string };
   'duel.decided': { duelId: string };
+  'duel.challenged': { duelId: string };
 }
 
 type Handler<K extends keyof DomainEventMap> = (e: DomainEventMap[K]) => Promise<unknown> | unknown;

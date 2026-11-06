@@ -11,10 +11,11 @@ import { QuestionsModule } from './questions/questions.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ScoringModule } from './scoring/scoring.module';
 import { LeaguesModule } from './leagues/leagues.module';
+import { DuelsModule } from './duels/duels.module';
 import { TestRoutesModule } from './test-routes/test-routes.module';
 
 @Module({
-  imports: [CommonModule, JobsModule, RealtimeModule, AuthModule, QuestionsModule, ScoringModule, LeaguesModule, UsersModule, CategoriesModule, TestRoutesModule.register()],
+  imports: [CommonModule, JobsModule, RealtimeModule, AuthModule, QuestionsModule, ScoringModule, LeaguesModule, DuelsModule, UsersModule, CategoriesModule, TestRoutesModule.register()],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AppGuard }],
 })
