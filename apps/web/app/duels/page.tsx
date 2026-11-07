@@ -35,7 +35,7 @@ export default function DuelsPage() {
               <li key={d.id}>
                 <Link href={`/duels/${d.id}`} className="card block hover:border-brand-600">
                   <div className="mb-1 flex flex-wrap gap-2 text-xs">
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium">{t(`duelStatus.${d.status}`)}</span>
+                    <span className="rounded-full bg-track px-2 py-0.5 font-medium">{t(`duelStatus.${d.status}`)}</span>
                     <span className="rounded-full bg-brand-50 px-2 py-0.5 text-brand-800">{t(`duels.${d.format}`)}</span>
                   </div>
                   <p className="font-medium">{t('duels.vs', { a: d.challenger.nickname, b: d.opponent?.nickname ?? '…' })}</p>

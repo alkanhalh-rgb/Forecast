@@ -57,7 +57,7 @@ export default function DuelPage() {
       <PageTitle>{t('duels.vs', { a: d.challenger.nickname, b: d.opponent?.nickname ?? '…' })}</PageTitle>
       <section className="card space-y-1">
         <p>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-sm font-medium">{t(`duelStatus.${d.status}`)}</span> <span className="text-sm">{t(`duels.${d.format}`)}</span>
+          <span className="rounded-full bg-track px-2 py-0.5 text-sm font-medium">{t(`duelStatus.${d.status}`)}</span> <span className="text-sm">{t(`duels.${d.format}`)}</span>
         </p>
         {d.status === 'PENDING' && <p className="num text-sm text-muted">{t('duels.expiresAt', { time: dt(d.expiresAt) })}</p>}
         {rk && (

@@ -32,7 +32,7 @@ export default function OnboardingPage() {
       <p className="mb-2 text-sm text-muted" aria-live="polite">
         {t('onboarding.step', { n: step, total: TOTAL })}
       </p>
-      <div className="mb-6 h-2 rounded-full bg-gray-200" aria-hidden>
+      <div className="mb-6 h-2 rounded-full bg-track" aria-hidden>
         <div className="h-2 rounded-full bg-brand-600" style={{ inlineSize: `${(step / TOTAL) * 100}%` }} />
       </div>
       {step === 1 && <AgeStep onDone={() => refresh()} />}
@@ -192,8 +192,8 @@ function WarmupStep({ onDone }: { onDone: () => Promise<void> }) {
         </p>
       )}
       {data.map((q) => (
-        <section key={q.id} className="card" aria-labelledby={`wq-${q.id}`}>
-          <h2 id={`wq-${q.id}`} className="mb-3 font-bold">
+        <section key={q.id} className="flex flex-col gap-2" aria-labelledby={`wq-${q.id}`}>
+          <h2 id={`wq-${q.id}`} className="px-1 text-lg font-bold">
             {pick(q, 'text')}
           </h2>
           <ForecastForm q={q} onSaved={() => mutate()} />

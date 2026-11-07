@@ -1,57 +1,74 @@
 @import 'tailwindcss';
 @import '@fontsource/ibm-plex-sans-arabic/400.css';
 @import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
 @import '@fontsource/ibm-plex-sans-arabic/700.css';
 
-/* Colours chosen for WCAG AA contrast on their backgrounds. */
+/* Widget design. Every text/background pair below passes WCAG AA. */
 @theme {
   --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-600: #047857; /* 5.5:1 on white */
-  --color-brand-700: #065f46;
-  --color-brand-800: #064e3b;
-  --color-ink: #111827;
-  --color-muted: #4b5563; /* 7.5:1 on white */
-  --color-line: #d1d5db;
-  --color-good: #166534;
-  --color-bad: #b91c1c;
-  --color-warn: #92400e;
+  --color-canvas: #eef3f1;
+  --color-surface: #ffffff;
+  --color-soft: #f6f9f8;
+  --color-ink: #0f1f1a;
+  --color-muted: #4a5a55;
+  --color-line: #d3ddd9;
+  --color-track: #e3ece8;
+  --color-brand-50: #e3f1ec;
+  --color-brand-100: #cdebe0;
+  --color-brand-600: #0b6b4f;
+  --color-brand-700: #08513c;
+  --color-brand-800: #08513c;
+  --color-amber: #f2b544;
+  --color-amber-50: #fdf1d8;
+  --color-amber-700: #8a4b00;
+  --color-blue: #1e46b4;
+  --color-blue-50: #e7edfb;
+  --color-good: #08513c;
+  --color-bad: #9c2b10;
+  --color-bad-50: #fbe9e4;
+  --color-warn: #8a4b00;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
 }
 body {
-  @apply bg-gray-50 text-ink font-sans antialiased;
+  @apply bg-canvas font-sans text-ink antialiased;
 }
 :focus-visible {
-  outline: 3px solid var(--color-brand-600);
+  outline: 3px solid var(--color-blue);
   outline-offset: 2px;
 }
 @utility card {
-  @apply rounded-2xl border border-line bg-white p-4 shadow-sm;
+  @apply rounded-[22px] bg-surface p-4;
+}
+@utility widget {
+  @apply flex flex-col gap-1.5 rounded-[22px] bg-surface p-4;
 }
 @utility btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-2 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
   @apply btn bg-brand-600 text-white hover:bg-brand-700;
 }
 @utility btn-secondary {
-  @apply btn border border-line bg-white text-ink hover:bg-gray-100;
+  @apply btn border border-line bg-surface text-ink hover:bg-soft;
 }
 @utility btn-danger {
-  @apply btn bg-bad text-white hover:bg-red-800;
+  @apply btn bg-bad text-white hover:bg-red-900;
 }
 @utility input {
-  @apply block w-full min-h-11 rounded-xl border border-gray-400 bg-white px-3 py-2 text-ink placeholder:text-gray-500;
+  @apply block w-full min-h-12 rounded-2xl border border-line bg-surface px-3 py-2 text-ink placeholder:text-gray-500;
 }
 @utility label {
-  @apply mb-1 block text-sm font-medium text-ink;
+  @apply mb-1 block text-sm font-semibold text-ink;
 }
 @utility chip {
-  @apply inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors;
+  @apply inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold transition-colors;
+}
+@utility pill {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
 }
 @utility num {
   font-variant-numeric: tabular-nums;

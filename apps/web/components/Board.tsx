@@ -18,7 +18,7 @@ export function Board({ rows, mine, caption }: { rows: BoardRow[]; mine?: BoardR
     <div className="card overflow-hidden p-0">
       <table className="w-full text-start">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-gray-100 text-sm">
+        <thead className="bg-track text-sm">
           <tr>
             <th scope="col" className="px-3 py-2 text-start">
               {t('leaderboards.rank')}

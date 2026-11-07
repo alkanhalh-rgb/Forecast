@@ -82,7 +82,7 @@ export default function AdminQuestion() {
     <div className="space-y-4">
       <section className="card space-y-1">
         <p className="text-sm">
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium">{t(`status.${q.status}`)}</span>
+          <span className="rounded-full bg-track px-2 py-0.5 font-medium">{t(`status.${q.status}`)}</span>
         </p>
         <h2 className="text-lg font-bold">{q.textAr}</h2>
         <p dir="ltr" lang="en" className="text-start">

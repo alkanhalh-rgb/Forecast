@@ -32,7 +32,7 @@ test('full duel: create, share link, accept with a different answer, resolve, re
   await loginAs(ca, a.token);
   const pa = await ca.newPage();
   await pa.goto(`/q/${q.id}`);
-  await pa.getByRole('link', { name: 'تحدَّ صديقاً على هذا السؤال' }).click();
+  await pa.getByRole('link', { name: /تحدَّ صديقاً/ }).click();
   await expect(pa.getByRole('heading', { name: 'تحدٍّ جديد' })).toBeVisible();
   await pa.getByLabel('فوز الهلال').check();
   await pa.getByRole('button', { name: 'أرسل التحدي' }).click();

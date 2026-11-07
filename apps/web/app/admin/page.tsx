@@ -32,7 +32,7 @@ export default function AdminQuestions() {
             <li key={q.id}>
               <Link href={`/admin/q/${q.id}`} className="card block hover:border-brand-600">
                 <div className="mb-1 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium">{t(`status.${q.status}`)}</span>
+                  <span className="rounded-full bg-track px-2 py-0.5 font-medium">{t(`status.${q.status}`)}</span>
                   <span className="rounded-full bg-brand-50 px-2 py-0.5 text-brand-800">{pick(q.category, 'name')}</span>
                   {q.resolution && !q.resolution.confirmedById && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-warn">{t('admin.confirmQueue')}</span>}
                   {q._count.disputes > 0 && <span className="rounded-full bg-red-100 px-2 py-0.5 text-bad">{t('admin.disputes')}: {n(q._count.disputes)}</span>}

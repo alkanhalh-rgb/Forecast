@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ACCURACY_WINDOW_DAYS, accuracyRating, DAY_MS, forecastScore, seasonWindow, weekStart } from '@app/shared';
+import { ACCURACY_WINDOW_DAYS, accuracyRating, DAY_MS, forecastScore, riyadhDay, seasonWindow, weekStart } from '@app/shared';
 import { loadConfig } from '../config';
 import { ClockService } from '../common/clock.service';
 import { DomainEvents, ScoreDelta } from '../common/events.service';
@@ -68,16 +68,21 @@ export class ScoringService {
     const now = this.clock.now();
     const season = await this.currentSeason();
     const week = weekStart(now);
-    const [seasonAgg, weekAgg, total, windowScores] = await Promise.all([
+    const [seasonAgg, weekScores, total, windowScores] = await Promise.all([
       this.prisma.score.aggregate({ where: { userId, seasonId: season.id }, _sum: { points: true } }),
-      this.prisma.score.aggregate({ where: { userId, weekStart: week }, _sum: { points: true } }),
+      this.prisma.score.findMany({ where: { userId, weekStart: week }, select: { points: true, scoredAt: true } }),
       this.prisma.score.count({ where: { userId } }),
       this.prisma.score.findMany({ where: { userId, scoredAt: { gte: new Date(now.getTime() - ACCURACY_WINDOW_DAYS * DAY_MS) } }, select: { points: true } }),
     ]);
     return {
       season: { id: season.id, index: season.index, startsAt: season.startsAt, endsAt: season.endsAt },
       seasonPoints: seasonAgg._sum.points ?? 0,
-      weekPoints: weekAgg._sum.points ?? 0,
+      weekPoints: weekScores.reduce((a, x) => a + x.points, 0),
+      /** points per Riyadh day of the current week (Sunday first), for the weekly chart */
+      weekDaily: Array.from({ length: 7 }, (_, i) => {
+        const day = riyadhDay(new Date(week.getTime() + i * DAY_MS));
+        return weekScores.filter((x) => riyadhDay(x.scoredAt) === day).reduce((a, x) => a + x.points, 0);
+      }),
       scoredForecasts: total,
       accuracy: accuracyRating(total, windowScores.map((s) => s.points)),
     };
